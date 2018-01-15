@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <limits.h>
 
-#if !defined(__clang__) && !defined(__GNUC__) && !defined(__SUNPRO_C)
+#if !defined(__clang__) && !defined(__GNUC__)
 # ifdef __attribute__
 #  undef __attribute__
 # endif
