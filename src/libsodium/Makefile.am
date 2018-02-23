@@ -181,6 +181,7 @@ libsodium_la_LDFLAGS = \
 
 libsodium_la_CPPFLAGS = \
 	$(LTDLINCL) \
+	@SGX_CPPFLAGS@ \
 	-I$(srcdir)/include/sodium \
 	-I$(builddir)/include/sodium
 

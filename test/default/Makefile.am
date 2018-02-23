@@ -1,6 +1,10 @@
 
 EXTRA_DIST = \
 	cmptest.h \
+	test_enclave.h \
+	enclave_private.pem \
+	enclave_config.xml \
+	enclave.edl \
 	wintest.bat \
 	pre.js.inc \
 	aead_aes256gcm.exp \
@@ -318,6 +322,10 @@ AM_CPPFLAGS = \
 	-I$(top_builddir)/src/libsodium/include/sodium \
 	-I$(top_srcdir)/test/quirks
 
+if SGX
+AM_CPPFLAGS += $(SGX_CPPFLAGS)
+endif
+
 AM_LDFLAGS = @TEST_LDFLAGS@
 
 TESTS_TARGETS = \
@@ -389,245 +397,18 @@ TESTS_TARGETS = \
 	stream4 \
 	verify1
 
+# if !SGX
+
 if !EMSCRIPTEN
 if !NATIVECLIENT
-TESTS_TARGETS += \
-	sodium_utils2 \
-	sodium_utils3
+TESTS_TARGETS += sodium_utils2
+
+if !SGX
+	TESTS_TARGETS += sodium_utils3
+endif
+
 endif
 endif
-
-check_PROGRAMS = $(TESTS_TARGETS)
-
-TESTS = $(TESTS_TARGETS)
-
-TESTS_LDADD = \
-	${top_builddir}/src/libsodium/libsodium.la
-
-aead_aes256gcm_SOURCE                 = cmptest.h aead_aes256gcm.c
-aead_aes256gcm_LDADD                  = $(TESTS_LDADD)
-
-aead_aes256gcm2_SOURCE                = cmptest.h aead_aes256gcm2.c
-aead_aes256gcm2_LDADD                 = $(TESTS_LDADD)
-
-aead_chacha20poly1305_SOURCE          = cmptest.h aead_chacha20poly1305.c
-aead_chacha20poly1305_LDADD           = $(TESTS_LDADD)
-
-aead_chacha20poly13052_SOURCE         = cmptest.h aead_chacha20poly13052.c
-aead_chacha20poly13052_LDADD          = $(TESTS_LDADD)
-
-aead_xchacha20poly1305_SOURCE         = cmptest.h aead_xchacha20poly1305.c
-aead_xchacha20poly1305_LDADD          = $(TESTS_LDADD)
-
-auth_SOURCE               = cmptest.h auth.c
-auth_LDADD                = $(TESTS_LDADD)
-
-auth2_SOURCE              = cmptest.h auth2.c
-auth2_LDADD               = $(TESTS_LDADD)
-
-auth3_SOURCE              = cmptest.h auth3.c
-auth3_LDADD               = $(TESTS_LDADD)
-
-auth5_SOURCE              = cmptest.h auth5.c quirks.h
-auth5_LDADD               = $(TESTS_LDADD)
-
-auth6_SOURCE              = cmptest.h auth6.c quirks.h
-auth6_LDADD               = $(TESTS_LDADD)
-
-auth7_SOURCE              = cmptest.h auth7.c quirks.h
-auth7_LDADD               = $(TESTS_LDADD)
-
-box_SOURCE                = cmptest.h box.c
-box_LDADD                 = $(TESTS_LDADD)
-
-box2_SOURCE               = cmptest.h box2.c
-box2_LDADD                = $(TESTS_LDADD)
-
-box7_SOURCE               = cmptest.h box7.c
-box7_LDADD                = $(TESTS_LDADD)
-
-box8_SOURCE               = cmptest.h box8.c
-box8_LDADD                = $(TESTS_LDADD)
-
-box_easy_SOURCE           = cmptest.h box_easy.c
-box_easy_LDADD            = $(TESTS_LDADD)
-
-box_easy2_SOURCE          = cmptest.h box_easy2.c
-box_easy2_LDADD           = $(TESTS_LDADD)
-
-box_seal_SOURCE           = cmptest.h box_seal.c
-box_seal_LDADD            = $(TESTS_LDADD)
-
-box_seed_SOURCE           = cmptest.h box_seed.c
-box_seed_LDADD            = $(TESTS_LDADD)
-
-chacha20_SOURCE           = cmptest.h chacha20.c
-chacha20_LDADD            = $(TESTS_LDADD)
-
-codecs_SOURCE             = cmptest.h codecs.c
-codecs_LDADD              = $(TESTS_LDADD)
-
-core_ed25519_SOURCE       = cmptest.h core_ed25519.c
-core_ed25519_LDADD        = $(TESTS_LDADD)
-
-core1_SOURCE              = cmptest.h core1.c
-core1_LDADD               = $(TESTS_LDADD)
-
-core2_SOURCE              = cmptest.h core2.c
-core2_LDADD               = $(TESTS_LDADD)
-
-core3_SOURCE              = cmptest.h core3.c
-core3_LDADD               = $(TESTS_LDADD)
-
-core4_SOURCE              = cmptest.h core4.c
-core4_LDADD               = $(TESTS_LDADD)
-
-core5_SOURCE              = cmptest.h core5.c
-core5_LDADD               = $(TESTS_LDADD)
-
-core6_SOURCE              = cmptest.h core6.c
-core6_LDADD               = $(TESTS_LDADD)
-
-ed25519_convert_SOURCE    = cmptest.h ed25519_convert.c
-ed25519_convert_LDADD     = $(TESTS_LDADD)
-
-generichash_SOURCE        = cmptest.h generichash.c
-generichash_LDADD         = $(TESTS_LDADD)
-
-generichash2_SOURCE       = cmptest.h generichash2.c
-generichash2_LDADD        = $(TESTS_LDADD)
-
-generichash3_SOURCE       = cmptest.h generichash3.c
-generichash3_LDADD        = $(TESTS_LDADD)
-
-hash_SOURCE               = cmptest.h hash.c
-hash_LDADD                = $(TESTS_LDADD)
-
-hash3_SOURCE              = cmptest.h hash3.c
-hash3_LDADD               = $(TESTS_LDADD)
-
-kdf_SOURCE                = cmptest.h kdf.c
-kdf_LDADD                 = $(TESTS_LDADD)
-
-keygen_SOURCE             = cmptest.h keygen.c
-keygen_LDADD              = $(TESTS_LDADD)
-
-kx_SOURCE                 = cmptest.h kx.c
-kx_LDADD                  = $(TESTS_LDADD)
-
-metamorphic_SOURCE        = cmptest.h metamorphic.c
-metamorphic_LDADD         = $(TESTS_LDADD)
-
-misuse_SOURCE             = cmptest.h misuse.c
-misuse_LDADD              = $(TESTS_LDADD)
-
-onetimeauth_SOURCE        = cmptest.h onetimeauth.c
-onetimeauth_LDADD         = $(TESTS_LDADD)
-
-onetimeauth2_SOURCE       = cmptest.h onetimeauth2.c
-onetimeauth2_LDADD        = $(TESTS_LDADD)
-
-onetimeauth7_SOURCE       = cmptest.h onetimeauth7.c
-onetimeauth7_LDADD        = $(TESTS_LDADD)
-
-pwhash_argon2i_SOURCE     = cmptest.h pwhash_argon2i.c
-pwhash_argon2i_LDADD      = $(TESTS_LDADD)
-
-pwhash_argon2id_SOURCE    = cmptest.h pwhash_argon2id.c
-pwhash_argon2id_LDADD     = $(TESTS_LDADD)
-
-pwhash_scrypt_SOURCE      = cmptest.h pwhash_scrypt.c
-pwhash_scrypt_LDADD       = $(TESTS_LDADD)
-
-pwhash_scrypt_ll_SOURCE   = cmptest.h pwhash_scrypt_ll.c
-pwhash_scrypt_ll_LDADD    = $(TESTS_LDADD)
-
-randombytes_SOURCE        = cmptest.h randombytes.c
-randombytes_LDADD         = $(TESTS_LDADD)
-
-scalarmult_SOURCE         = cmptest.h scalarmult.c
-scalarmult_LDADD          = $(TESTS_LDADD)
-
-scalarmult_ed25519_SOURCE = cmptest.h scalarmult_ed25519.c
-scalarmult_ed25519_LDADD  = $(TESTS_LDADD)
-
-scalarmult2_SOURCE        = cmptest.h scalarmult2.c
-scalarmult2_LDADD         = $(TESTS_LDADD)
-
-scalarmult5_SOURCE        = cmptest.h scalarmult5.c
-scalarmult5_LDADD         = $(TESTS_LDADD)
-
-scalarmult6_SOURCE        = cmptest.h scalarmult6.c
-scalarmult6_LDADD         = $(TESTS_LDADD)
-
-scalarmult7_SOURCE        = cmptest.h scalarmult7.c
-scalarmult7_LDADD         = $(TESTS_LDADD)
-
-scalarmult8_SOURCE        = cmptest.h scalarmult8.c
-scalarmult8_LDADD         = $(TESTS_LDADD)
-
-secretbox_SOURCE          = cmptest.h secretbox.c
-secretbox_LDADD           = $(TESTS_LDADD)
-
-secretbox2_SOURCE         = cmptest.h secretbox2.c
-secretbox2_LDADD          = $(TESTS_LDADD)
-
-secretbox7_SOURCE         = cmptest.h secretbox7.c
-secretbox7_LDADD          = $(TESTS_LDADD)
-
-secretbox8_SOURCE         = cmptest.h secretbox8.c
-secretbox8_LDADD          = $(TESTS_LDADD)
-
-secretbox_easy_SOURCE     = cmptest.h secretbox_easy.c
-secretbox_easy_LDADD      = $(TESTS_LDADD)
-
-secretbox_easy2_SOURCE    = cmptest.h secretbox_easy2.c
-secretbox_easy2_LDADD     = $(TESTS_LDADD)
-
-secretstream_SOURCE       = cmptest.h secretstream.c
-secretstream_LDADD        = $(TESTS_LDADD)
-
-shorthash_SOURCE          = cmptest.h shorthash.c
-shorthash_LDADD           = $(TESTS_LDADD)
-
-sign_SOURCE               = cmptest.h sign.c
-sign_LDADD                = $(TESTS_LDADD)
-
-siphashx24_SOURCE         = cmptest.h siphashx24.c
-siphashx24_LDADD          = $(TESTS_LDADD)
-
-sodium_core_SOURCE        = cmptest.h sodium_core.c
-sodium_core_LDADD         = $(TESTS_LDADD)
-
-sodium_utils_SOURCE       = cmptest.h sodium_utils.c
-sodium_utils_LDADD        = $(TESTS_LDADD)
-
-sodium_utils2_SOURCE      = cmptest.h sodium_utils2.c
-sodium_utils2_LDADD       = $(TESTS_LDADD)
-
-sodium_utils3_SOURCE      = cmptest.h sodium_utils3.c
-sodium_utils3_LDADD       = $(TESTS_LDADD)
-
-sodium_version_SOURCE     = cmptest.h sodium_version.c
-sodium_version_LDADD      = $(TESTS_LDADD)
-
-stream_SOURCE             = cmptest.h stream.c
-stream_LDADD              = $(TESTS_LDADD)
-
-stream2_SOURCE            = cmptest.h stream2.c
-stream2_LDADD             = $(TESTS_LDADD)
-
-stream3_SOURCE            = cmptest.h stream3.c
-stream3_LDADD             = $(TESTS_LDADD)
-
-stream4_SOURCE            = cmptest.h stream4.c
-stream4_LDADD             = $(TESTS_LDADD)
-
-verify1_SOURCE            = cmptest.h verify1.c
-verify1_LDADD             = $(TESTS_LDADD)
-
-xchacha20_SOURCE          = cmptest.h xchacha20.c
-xchacha20_LDADD           = $(TESTS_LDADD)
 
 if !MINIMAL
 TESTS_TARGETS += \
@@ -638,6 +419,633 @@ TESTS_TARGETS += \
 	siphashx24 \
 	xchacha20
 endif
+
+if SGX
+ENCLAVES = $(TESTS_TARGETS:%=%_enclave.signed.so)
+UNSIG_ENCLAVES = $(TESTS_TARGETS:%=%_enclave.so)
+
+SGX_CLEANFILES = $(ENCLAVES) $(UNSIG_ENCLAVES) \
+    enclave_t.c \
+    enclave_t.h \
+    enclave_u.c \
+    enclave_u.h 
+    
+if NATIVECLIENT
+    CLEANFILES += $(SGX_CLEANFILES)
+else
+    CLEANFILES = $(SGX_CLEANFILES)
+endif
+
+endif
+
+check_PROGRAMS = $(TESTS_TARGETS) 
+check_SCRIPTS = $(ENCLAVES)
+
+TESTS = $(TESTS_TARGETS)
+
+if !SGX
+TESTS_LDADD = \
+	${top_builddir}/src/libsodium/libsodium.la
+TESTS_CPPFLAGS = $(AM_CPPFLAGS)
+else
+
+
+if AMD64_BUILD
+    SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
+    SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
+    SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+else
+    SGX_LIBRARY_PATH := $(SGX_SDK)/lib
+    SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x86/sgx_sign
+    SGX_EDGER8R := $(SGX_SDK)/bin/x86/sgx_edger8r
+endif
+
+
+enclave_private.pem:
+
+enclave_config.xml:
+
+enclave.edl:
+
+enclave_t.c enclave_t.h: enclave.edl
+	$(SGX_EDGER8R) --use-prefix --trusted enclave.edl --search-path $(SGX_SDK)/include
+
+enclave_u.c enclave_u.h: enclave.edl
+	$(SGX_EDGER8R) --use-prefix --untrusted enclave.edl --search-path $(SGX_SDK)/include
+
+
+if !SGX_HW
+ Trts_Library_Name := sgx_trts_sim
+ Service_Library_Name := sgx_tservice_sim
+ Urts_Library_Name := sgx_urts_sim
+ Uae_Service_Library_Name := sgx_uae_service_sim
+else
+ Trts_Library_Name := sgx_trts
+ Service_Library_Name := sgx_tservice
+ Urts_Library_Name := sgx_urts
+ Uae_Service_Library_Name := sgx_uae_service
+endif
+
+Crypto_Library_Name := sgx_tcrypto
+
+ENCLAVE_LINK_FLAGS := -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_LIBRARY_PATH) \
+	-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
+	-Wl,--start-group -lsgx_tstdc -l$(Crypto_Library_Name) -l$(Service_Library_Name) -Wl,-Bstatic -Wl,--end-group \
+	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
+	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
+	-Wl,--defsym,__ImageBase=0 -Wl,--gc-sections
+
+SUFFIXES = .signed.so .so _enclave.so
+
+.so.signed.so:
+	@echo "  SIGN    " $@
+	@$(SGX_ENCLAVE_SIGNER) sign -key enclave_private.pem -enclave $< -out $@ -config enclave_config.xml 1> /dev/null
+
+.o_enclave.so: 
+	@echo "  CC      " $@
+	@$(CC) $^ -o $@ $(CFLAGS) $(AM_CPPFLAGS) $(SGX_CPPFLAGS) $(ENCLAVE_LINK_FLAGS)
+
+$(UNSIG_ENCLAVES) : ${top_builddir}/src/libsodium/.libs/libsodium.a test_enclave.h enclave_t.h enclave_t.o
+
+$(ENCLAVES) :  enclave_private.pem enclave_config.xml 
+
+TESTS_CPPFLAGS = -I$(SGX_SDK)/include
+TESTS_LINK_FLAGS = -L$(SGX_LIBRARY_PATH)  -l$(Uae_Service_Library_Name) -l$(Urts_Library_Name) -lpthread
+endif 
+
+
+if SGX
+
+test_app.c : enclave_u.h
+
+TEST_APP_SOURCE = test_app.c 
+ENCLAVE_APP_SOURCE = enclave_u.h enclave_u.c
+
+aead_aes256gcm_SOURCES                       = $(TEST_APP_SOURCE)
+nodist_aead_aes256gcm_SOURCES          = $(ENCLAVE_APP_SOURCE)
+aead_chacha20poly1305_SOURCES                = $(TEST_APP_SOURCE)
+nodist_aead_chacha20poly1305_SOURCES   = $(ENCLAVE_APP_SOURCE)
+aead_xchacha20poly1305_SOURCES               = $(TEST_APP_SOURCE)
+nodist_aead_xchacha20poly1305_SOURCES  = $(ENCLAVE_APP_SOURCE)
+auth_SOURCES                                 = $(TEST_APP_SOURCE)
+nodist_auth_SOURCES                    = $(ENCLAVE_APP_SOURCE)
+auth2_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_auth2_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+auth3_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_auth3_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+auth5_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_auth5_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+auth6_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_auth6_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+auth7_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_auth7_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+box_SOURCES                                  = $(TEST_APP_SOURCE)
+nodist_box_SOURCES                     = $(ENCLAVE_APP_SOURCE)
+box2_SOURCES                                 = $(TEST_APP_SOURCE)
+nodist_box2_SOURCES                    = $(ENCLAVE_APP_SOURCE)
+box7_SOURCES                                 = $(TEST_APP_SOURCE)
+nodist_box7_SOURCES                    = $(ENCLAVE_APP_SOURCE)
+box8_SOURCES                                 = $(TEST_APP_SOURCE)
+nodist_box8_SOURCES                    = $(ENCLAVE_APP_SOURCE)
+box_easy_SOURCES                             = $(TEST_APP_SOURCE)
+nodist_box_easy_SOURCES                = $(ENCLAVE_APP_SOURCE)
+box_easy2_SOURCES                            = $(TEST_APP_SOURCE)
+nodist_box_easy2_SOURCES               = $(ENCLAVE_APP_SOURCE)
+box_seal_SOURCES                             = $(TEST_APP_SOURCE)
+nodist_box_seal_SOURCES                = $(ENCLAVE_APP_SOURCE)
+box_seed_SOURCES                             = $(TEST_APP_SOURCE)
+nodist_box_seed_SOURCES                = $(ENCLAVE_APP_SOURCE)
+chacha20_SOURCES                             = $(TEST_APP_SOURCE)
+nodist_chacha20_SOURCES                = $(ENCLAVE_APP_SOURCE)
+codecs_SOURCES                               = $(TEST_APP_SOURCE)
+nodist_codecs_SOURCES                  = $(ENCLAVE_APP_SOURCE)
+core_ed25519_SOURCES                         = $(TEST_APP_SOURCE)
+nodist_core_ed25519_SOURCES            = $(ENCLAVE_APP_SOURCE)
+core1_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_core1_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+core2_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_core2_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+core3_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_core3_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+core4_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_core4_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+core5_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_core5_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+core6_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_core6_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+ed25519_convert_SOURCES                      = $(TEST_APP_SOURCE)
+nodist_ed25519_convert_SOURCES         = $(ENCLAVE_APP_SOURCE)
+generichash_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_generichash_SOURCES             = $(ENCLAVE_APP_SOURCE)
+generichash2_SOURCES                         = $(TEST_APP_SOURCE)
+nodist_generichash2_SOURCES            = $(ENCLAVE_APP_SOURCE)
+generichash3_SOURCES                         = $(TEST_APP_SOURCE)
+nodist_generichash3_SOURCES            = $(ENCLAVE_APP_SOURCE)
+hash_SOURCES                                 = $(TEST_APP_SOURCE)
+nodist_hash_SOURCES                    = $(ENCLAVE_APP_SOURCE)
+hash3_SOURCES                                = $(TEST_APP_SOURCE)
+nodist_hash3_SOURCES                   = $(ENCLAVE_APP_SOURCE)
+kdf_SOURCES                                  = $(TEST_APP_SOURCE)
+nodist_kdf_SOURCES                     = $(ENCLAVE_APP_SOURCE)
+keygen_SOURCES                               = $(TEST_APP_SOURCE)
+nodist_keygen_SOURCES                  = $(ENCLAVE_APP_SOURCE)
+kx_SOURCES                                   = $(TEST_APP_SOURCE)
+nodist_kx_SOURCES                      = $(ENCLAVE_APP_SOURCE)
+metamorphic_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_metamorphic_SOURCES             = $(ENCLAVE_APP_SOURCE)
+misuse_SOURCES                               = $(TEST_APP_SOURCE)
+nodist_misuse_SOURCES                  = $(ENCLAVE_APP_SOURCE)
+onetimeauth_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_onetimeauth_SOURCES             = $(ENCLAVE_APP_SOURCE)
+onetimeauth2_SOURCES                         = $(TEST_APP_SOURCE)
+nodist_onetimeauth2_SOURCES            = $(ENCLAVE_APP_SOURCE)
+onetimeauth7_SOURCES                         = $(TEST_APP_SOURCE)
+nodist_onetimeauth7_SOURCES            = $(ENCLAVE_APP_SOURCE)
+pwhash_argon2i_SOURCES                       = $(TEST_APP_SOURCE)
+nodist_pwhash_argon2i_SOURCES          = $(ENCLAVE_APP_SOURCE)
+pwhash_argon2id_SOURCES                      = $(TEST_APP_SOURCE)
+nodist_pwhash_argon2id_SOURCES         = $(ENCLAVE_APP_SOURCE)
+pwhash_scrypt_SOURCES                        = $(TEST_APP_SOURCE)
+nodist_pwhash_scrypt_SOURCES           = $(ENCLAVE_APP_SOURCE)
+pwhash_scrypt_ll_SOURCES                     = $(TEST_APP_SOURCE)
+nodist_pwhash_scrypt_ll_SOURCES        = $(ENCLAVE_APP_SOURCE)
+randombytes_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_randombytes_SOURCES             = $(ENCLAVE_APP_SOURCE)
+scalarmult_SOURCES                           = $(TEST_APP_SOURCE)
+nodist_scalarmult_SOURCES              = $(ENCLAVE_APP_SOURCE)
+scalarmult_ed25519_SOURCES                   = $(TEST_APP_SOURCE)
+nodist_scalarmult_ed25519_SOURCES      = $(ENCLAVE_APP_SOURCE)
+scalarmult2_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_scalarmult2_SOURCES             = $(ENCLAVE_APP_SOURCE)
+scalarmult5_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_scalarmult5_SOURCES             = $(ENCLAVE_APP_SOURCE)
+scalarmult6_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_scalarmult6_SOURCES             = $(ENCLAVE_APP_SOURCE)
+scalarmult7_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_scalarmult7_SOURCES             = $(ENCLAVE_APP_SOURCE)
+secretbox_SOURCES                            = $(TEST_APP_SOURCE)
+nodist_secretbox_SOURCES               = $(ENCLAVE_APP_SOURCE)
+secretbox2_SOURCES                           = $(TEST_APP_SOURCE)
+nodist_secretbox2_SOURCES              = $(ENCLAVE_APP_SOURCE)
+secretbox7_SOURCES                           = $(TEST_APP_SOURCE)
+nodist_secretbox7_SOURCES              = $(ENCLAVE_APP_SOURCE)
+secretbox8_SOURCES                           = $(TEST_APP_SOURCE)
+nodist_secretbox8_SOURCES              = $(ENCLAVE_APP_SOURCE)
+secretbox_easy_SOURCES                       = $(TEST_APP_SOURCE)
+nodist_secretbox_easy_SOURCES          = $(ENCLAVE_APP_SOURCE)
+secretbox_easy2_SOURCES                      = $(TEST_APP_SOURCE)
+nodist_secretbox_easy2_SOURCES         = $(ENCLAVE_APP_SOURCE)
+secretstream_SOURCES                         = $(TEST_APP_SOURCE)
+nodist_secretstream_SOURCES            = $(ENCLAVE_APP_SOURCE)
+shorthash_SOURCES                            = $(TEST_APP_SOURCE)
+nodist_shorthash_SOURCES               = $(ENCLAVE_APP_SOURCE)
+sign_SOURCES                                 = $(TEST_APP_SOURCE)
+nodist_sign_SOURCES                    = $(ENCLAVE_APP_SOURCE)
+siphashx24_SOURCES                           = $(TEST_APP_SOURCE)
+nodist_siphashx24_SOURCES              = $(ENCLAVE_APP_SOURCE)
+sodium_core_SOURCES                          = $(TEST_APP_SOURCE)
+nodist_sodium_core_SOURCES             = $(ENCLAVE_APP_SOURCE)
+sodium_utils_SOURCES                         = $(TEST_APP_SOURCE)
+nodist_sodium_utils_SOURCES            = $(ENCLAVE_APP_SOURCE)
+sodium_utils2_SOURCES                        = $(TEST_APP_SOURCE)
+nodist_sodium_utils2_SOURCES           = $(ENCLAVE_APP_SOURCE)
+sodium_utils3_SOURCES                        = $(TEST_APP_SOURCE)
+nodist_sodium_utils3_SOURCES           = $(ENCLAVE_APP_SOURCE)
+sodium_version_SOURCES                       = $(TEST_APP_SOURCE)
+nodist_sodium_version_SOURCES          = $(ENCLAVE_APP_SOURCE)
+stream_SOURCES                               = $(TEST_APP_SOURCE)
+nodist_stream_SOURCES                  = $(ENCLAVE_APP_SOURCE)
+stream2_SOURCES                              = $(TEST_APP_SOURCE)
+nodist_stream2_SOURCES                 = $(ENCLAVE_APP_SOURCE)
+stream3_SOURCES                              = $(TEST_APP_SOURCE)
+nodist_stream3_SOURCES                 = $(ENCLAVE_APP_SOURCE)
+stream4_SOURCES                              = $(TEST_APP_SOURCE)
+nodist_stream4_SOURCES                 = $(ENCLAVE_APP_SOURCE)
+verify1_SOURCES                              = $(TEST_APP_SOURCE)
+nodist_verify1_SOURCES                 = $(ENCLAVE_APP_SOURCE)
+xchacha20_SOURCES                            = $(TEST_APP_SOURCE)
+nodist_xchacha20_SOURCES               = $(ENCLAVE_APP_SOURCE)
+
+else
+aead_aes256gcm_SOURCES          = cmptest.h aead_aes256gcm.c
+aead_chacha20poly1305_SOURCES   = cmptest.h aead_chacha20poly1305.c
+aead_xchacha20poly1305_SOURCES  = cmptest.h aead_xchacha20poly1305.c
+auth_SOURCES                    = cmptest.h auth.c
+auth2_SOURCES                   = cmptest.h auth2.c
+auth3_SOURCES                   = cmptest.h auth3.c
+auth5_SOURCES                   = cmptest.h auth5.c
+nodist_EXTRA_auth5_SOURCES      = quirks.h
+auth6_SOURCES                   = cmptest.h auth6.c
+nodist_EXTRA_auth6_SOURCES      = quirks.h
+auth7_SOURCES                   = cmptest.h auth7.c
+nodist_EXTRA_auth7_SOURCES      = quirks.h
+box_SOURCES                     = cmptest.h box.c
+box2_SOURCES                    = cmptest.h box2.c
+box7_SOURCES                    = cmptest.h box7.c
+box8_SOURCES                    = cmptest.h box8.c
+box_easy_SOURCES                = cmptest.h box_easy.c
+box_easy2_SOURCES               = cmptest.h box_easy2.c
+box_seal_SOURCES                = cmptest.h box_seal.c
+box_seed_SOURCES                = cmptest.h box_seed.c
+chacha20_SOURCES                = cmptest.h chacha20.c
+codecs_SOURCES                  = cmptest.h codecs.c
+core_ed25519_SOURCES            = cmptest.h core_ed25519.c
+core1_SOURCES                   = cmptest.h core1.c
+core2_SOURCES                   = cmptest.h core2.c
+core3_SOURCES                   = cmptest.h core3.c
+core4_SOURCES                   = cmptest.h core4.c
+core5_SOURCES                   = cmptest.h core5.c
+core6_SOURCES                   = cmptest.h core6.c
+ed25519_convert_SOURCES         = cmptest.h ed25519_convert.c
+generichash_SOURCES             = cmptest.h generichash.c
+generichash2_SOURCES            = cmptest.h generichash2.c
+generichash3_SOURCES            = cmptest.h generichash3.c
+hash_SOURCES                    = cmptest.h hash.c
+hash3_SOURCES                   = cmptest.h hash3.c
+kdf_SOURCES                     = cmptest.h kdf.c
+keygen_SOURCES                  = cmptest.h keygen.c
+kx_SOURCES                      = cmptest.h kx.c
+metamorphic_SOURCES             = cmptest.h metamorphic.c
+misuse_SOURCES                  = cmptest.h misuse.c
+onetimeauth_SOURCES             = cmptest.h onetimeauth.c
+onetimeauth2_SOURCES            = cmptest.h onetimeauth2.c
+onetimeauth7_SOURCES            = cmptest.h onetimeauth7.c
+pwhash_argon2i_SOURCES          = cmptest.h pwhash_argon2i.c
+pwhash_argon2id_SOURCES         = cmptest.h pwhash_argon2id.c
+pwhash_scrypt_SOURCES           = cmptest.h pwhash_scrypt.c
+pwhash_scrypt_ll_SOURCES        = cmptest.h pwhash_scrypt_ll.c
+randombytes_SOURCES             = cmptest.h randombytes.c
+scalarmult_SOURCES              = cmptest.h scalarmult.c
+scalarmult_ed25519_SOURCES      = cmptest.h scalarmult_ed25519.c
+scalarmult2_SOURCES             = cmptest.h scalarmult2.c
+scalarmult5_SOURCES             = cmptest.h scalarmult5.c
+scalarmult6_SOURCES             = cmptest.h scalarmult6.c
+scalarmult7_SOURCES             = cmptest.h scalarmult7.c
+secretbox_SOURCES               = cmptest.h secretbox.c
+secretbox2_SOURCES              = cmptest.h secretbox2.c
+secretbox7_SOURCES              = cmptest.h secretbox7.c
+secretbox8_SOURCES              = cmptest.h secretbox8.c
+secretbox_easy_SOURCES          = cmptest.h secretbox_easy.c
+secretbox_easy2_SOURCES         = cmptest.h secretbox_easy2.c
+secretstream_SOURCES            = cmptest.h secretstream.c
+shorthash_SOURCES               = cmptest.h shorthash.c
+sign_SOURCES                    = cmptest.h sign.c
+siphashx24_SOURCES              = cmptest.h siphashx24.c
+sodium_core_SOURCES             = cmptest.h sodium_core.c
+sodium_utils_SOURCES            = cmptest.h sodium_utils.c
+sodium_utils2_SOURCES           = cmptest.h sodium_utils2.c
+sodium_utils3_SOURCES           = cmptest.h sodium_utils3.c
+sodium_version_SOURCES          = cmptest.h sodium_version.c
+stream_SOURCES                  = cmptest.h stream.c
+stream2_SOURCES                 = cmptest.h stream2.c
+stream3_SOURCES                 = cmptest.h stream3.c
+stream4_SOURCES                 = cmptest.h stream4.c
+verify1_SOURCES                 = cmptest.h verify1.c
+xchacha20_SOURCES               = cmptest.h xchacha20.c
+endif
+
+aead_aes256gcm_LDADD                  = $(TESTS_LDADD)
+aead_aes256gcm_CPPFLAGS               = $(TESTS_CPPFLAGS) -DTEST_NAME=\"aead_aes256gcm\" -DTEST_NAME=\"aead_aes256gcm\"
+aead_aes256gcm_LDFLAGS                = $(TESTS_LINK_FLAGS)
+
+# BEGIN added by 6bece9c8c4 (upstream)
+aead_aes256gcm2_SOURCE                = cmptest.h aead_aes256gcm2.c
+aead_aes256gcm2_LDADD                 = $(TESTS_LDADD)
+# END added by 6bece9c8c4 (upstream)
+
+aead_chacha20poly1305_LDADD           = $(TESTS_LDADD)
+aead_chacha20poly1305_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"aead_chacha20poly1305\" -DTEST_NAME=\"aead_chacha20poly1305\"
+aead_chacha20poly1305_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+# BEGIN added by 6bece9c8c4 (upstream)
+aead_chacha20poly13052_SOURCE         = cmptest.h aead_chacha20poly13052.c
+aead_chacha20poly13052_LDADD          = $(TESTS_LDADD)
+# END added by 6bece9c8c4 (upstream)
+
+aead_xchacha20poly1305_LDADD           = $(TESTS_LDADD)
+aead_xchacha20poly1305_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"aead_xchacha20poly1305\"
+aead_xchacha20poly1305_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+auth_LDADD           = $(TESTS_LDADD)
+auth_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"auth\"
+auth_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+auth2_LDADD           = $(TESTS_LDADD)
+auth2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"auth2\"
+auth2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+auth3_LDADD           = $(TESTS_LDADD)
+auth3_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"auth3\"
+auth3_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+auth5_LDADD           = $(TESTS_LDADD)
+auth5_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"auth5\"
+auth5_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+auth6_LDADD           = $(TESTS_LDADD)
+auth6_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"auth6\"
+auth6_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+auth7_LDADD           = $(TESTS_LDADD)
+auth7_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"auth7\"
+auth7_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+box_LDADD           = $(TESTS_LDADD)
+box_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"box\"
+box_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+box2_LDADD           = $(TESTS_LDADD)
+box2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"box2\"
+box2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+box7_LDADD           = $(TESTS_LDADD)
+box7_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"box7\"
+box7_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+box8_LDADD           = $(TESTS_LDADD)
+box8_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"box8\"
+box8_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+box_easy_LDADD           = $(TESTS_LDADD)
+box_easy_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"box_easy\"
+box_easy_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+box_easy2_LDADD           = $(TESTS_LDADD)
+box_easy2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"box_easy2\"
+box_easy2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+box_seal_LDADD           = $(TESTS_LDADD)
+box_seal_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"box_seal\"
+box_seal_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+box_seed_LDADD           = $(TESTS_LDADD)
+box_seed_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"box_seed\"
+box_seed_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+chacha20_LDADD           = $(TESTS_LDADD)
+chacha20_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"chacha20\"
+chacha20_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+codecs_LDADD           = $(TESTS_LDADD)
+codecs_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"codecs\"
+codecs_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+core_ed25519_LDADD           = $(TESTS_LDADD)
+core_ed25519_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"core_ed25519\"
+core_ed25519_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+core1_LDADD           = $(TESTS_LDADD)
+core1_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"core1\"
+core1_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+core2_LDADD           = $(TESTS_LDADD)
+core2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"core2\"
+core2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+core3_LDADD           = $(TESTS_LDADD)
+core3_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"core3\"
+core3_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+core4_LDADD           = $(TESTS_LDADD)
+core4_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"core4\"
+core4_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+core5_LDADD           = $(TESTS_LDADD)
+core5_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"core5\"
+core5_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+core6_LDADD           = $(TESTS_LDADD)
+core6_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"core6\"
+core6_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+ed25519_convert_LDADD           = $(TESTS_LDADD)
+ed25519_convert_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"ed25519_convert\"
+ed25519_convert_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+generichash_LDADD           = $(TESTS_LDADD)
+generichash_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"generichash\"
+generichash_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+generichash2_LDADD           = $(TESTS_LDADD)
+generichash2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"generichash2\"
+generichash2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+generichash3_LDADD           = $(TESTS_LDADD)
+generichash3_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"generichash3\"
+generichash3_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+hash_LDADD           = $(TESTS_LDADD)
+hash_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"hash\"
+hash_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+hash3_LDADD           = $(TESTS_LDADD)
+hash3_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"hash3\"
+hash3_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+kdf_LDADD           = $(TESTS_LDADD)
+kdf_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"kdf\"
+kdf_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+keygen_LDADD           = $(TESTS_LDADD)
+keygen_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"keygen\"
+keygen_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+kx_LDADD           = $(TESTS_LDADD)
+kx_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"kx\"
+kx_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+metamorphic_LDADD           = $(TESTS_LDADD)
+metamorphic_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"metamorphic\"
+metamorphic_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+misuse_LDADD           = $(TESTS_LDADD)
+misuse_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"misuse\"
+misuse_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+onetimeauth_LDADD           = $(TESTS_LDADD)
+onetimeauth_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"onetimeauth\"
+onetimeauth_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+onetimeauth2_LDADD           = $(TESTS_LDADD)
+onetimeauth2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"onetimeauth2\"
+onetimeauth2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+onetimeauth7_LDADD           = $(TESTS_LDADD)
+onetimeauth7_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"onetimeauth7\"
+onetimeauth7_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+pwhash_argon2i_LDADD           = $(TESTS_LDADD)
+pwhash_argon2i_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"pwhash_argon2i\"
+pwhash_argon2i_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+pwhash_argon2id_LDADD           = $(TESTS_LDADD)
+pwhash_argon2id_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"pwhash_argon2id\"
+pwhash_argon2id_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+pwhash_scrypt_LDADD           = $(TESTS_LDADD)
+pwhash_scrypt_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"pwhash_scrypt\"
+pwhash_scrypt_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+pwhash_scrypt_ll_LDADD           = $(TESTS_LDADD)
+pwhash_scrypt_ll_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"pwhash_scrypt_ll\"
+pwhash_scrypt_ll_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+randombytes_LDADD           = $(TESTS_LDADD)
+randombytes_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"randombytes\"
+randombytes_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+scalarmult_LDADD           = $(TESTS_LDADD)
+scalarmult_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"scalarmult\"
+scalarmult_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+scalarmult_ed25519_LDADD           = $(TESTS_LDADD)
+scalarmult_ed25519_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"scalarmult_ed25519\"
+scalarmult_ed25519_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+scalarmult2_LDADD           = $(TESTS_LDADD)
+scalarmult2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"scalarmult2\"
+scalarmult2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+scalarmult5_LDADD           = $(TESTS_LDADD)
+scalarmult5_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"scalarmult5\"
+scalarmult5_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+scalarmult6_LDADD           = $(TESTS_LDADD)
+scalarmult6_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"scalarmult6\"
+scalarmult6_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+scalarmult7_LDADD           = $(TESTS_LDADD)
+scalarmult7_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"scalarmult7\"
+scalarmult7_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+# BEGIN added by 6bece9c8c4 (upstream)
+scalarmult8_SOURCE        = cmptest.h scalarmult8.c
+scalarmult8_LDADD         = $(TESTS_LDADD)
+# END added by 6bece9c8c4 (upstream)
+
+secretbox_LDADD           = $(TESTS_LDADD)
+secretbox_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"secretbox\"
+secretbox_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+secretbox2_LDADD           = $(TESTS_LDADD)
+secretbox2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"secretbox2\"
+secretbox2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+secretbox7_LDADD           = $(TESTS_LDADD)
+secretbox7_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"secretbox7\"
+secretbox7_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+secretbox8_LDADD           = $(TESTS_LDADD)
+secretbox8_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"secretbox8\"
+secretbox8_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+secretbox_easy_LDADD           = $(TESTS_LDADD)
+secretbox_easy_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"secretbox_easy\"
+secretbox_easy_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+secretbox_easy2_LDADD           = $(TESTS_LDADD)
+secretbox_easy2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"secretbox_easy2\"
+secretbox_easy2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+secretstream_LDADD           = $(TESTS_LDADD)
+secretstream_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"secretstream\"
+secretstream_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+shorthash_LDADD           = $(TESTS_LDADD)
+shorthash_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"shorthash\"
+shorthash_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+sign_LDADD           = $(TESTS_LDADD)
+sign_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"sign\"
+sign_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+siphashx24_LDADD           = $(TESTS_LDADD)
+siphashx24_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"siphashx24\"
+siphashx24_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+sodium_core_LDADD           = $(TESTS_LDADD)
+sodium_core_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"sodium_core\"
+sodium_core_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+sodium_utils_LDADD           = $(TESTS_LDADD)
+sodium_utils_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"sodium_utils\"
+sodium_utils_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+sodium_utils2_LDADD           = $(TESTS_LDADD)
+sodium_utils2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"sodium_utils2\"
+sodium_utils2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+sodium_utils3_LDADD           = $(TESTS_LDADD)
+sodium_utils3_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"sodium_utils3\"
+sodium_utils3_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+sodium_version_LDADD           = $(TESTS_LDADD)
+sodium_version_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"sodium_version\"
+sodium_version_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+stream_LDADD           = $(TESTS_LDADD)
+stream_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"stream\"
+stream_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+stream2_LDADD           = $(TESTS_LDADD)
+stream2_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"stream2\"
+stream2_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+stream3_LDADD           = $(TESTS_LDADD)
+stream3_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"stream3\"
+stream3_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+stream4_LDADD           = $(TESTS_LDADD)
+stream4_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"stream4\"
+stream4_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+verify1_LDADD           = $(TESTS_LDADD)
+verify1_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"verify1\"
+verify1_LDFLAGS         = $(TESTS_LINK_FLAGS)
+
+xchacha20_LDADD           = $(TESTS_LDADD)
+xchacha20_CPPFLAGS        = $(TESTS_CPPFLAGS) -DTEST_NAME=\"xchacha20\"
+xchacha20_LDFLAGS         = $(TESTS_LINK_FLAGS)
 
 if NATIVECLIENT
 LOG_COMPILER = ./nacl-test-wrapper.sh

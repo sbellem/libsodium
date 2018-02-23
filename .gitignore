@@ -11,6 +11,7 @@
 *.mem
 *.nexe
 *.o
+*.so
 *.plist
 *.scan
 *.sdf

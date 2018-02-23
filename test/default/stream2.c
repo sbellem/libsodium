@@ -1,6 +1,10 @@
 
 #define TEST_NAME "stream2"
+#ifndef SGX
 #include "cmptest.h"
+#else
+#include "test_enclave.h"
+#endif
 
 static const unsigned char secondkey[32] = {
     0xdc, 0x90, 0x8d, 0xda, 0x0b, 0x93, 0x44,

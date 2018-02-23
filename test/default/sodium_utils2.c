@@ -3,10 +3,17 @@
 #include <sys/types.h>
 
 #include <limits.h>
-#include <signal.h>
+
+#ifdef HAVE_SIGNAL_H
+# include <signal.h>
+#endif
 
 #define TEST_NAME "sodium_utils2"
+#ifndef SGX
 #include "cmptest.h"
+#else
+#include "test_enclave.h"
+#endif
 
 #ifdef __SANITIZE_ADDRESS__
 # warning The sodium_utils2 test is expected to fail with address sanitizer
@@ -16,7 +23,10 @@
 #undef sodium_free
 #undef sodium_allocarray
 
-__attribute__((noreturn)) static void
+#ifndef SGX
+__attribute__((noreturn))
+#endif
+static void 
 segv_handler(int sig)
 {
     (void) sig;
@@ -32,7 +42,9 @@ segv_handler(int sig)
 #ifdef SIGABRT
     signal(SIGABRT, SIG_DFL);
 #endif
+#ifndef SGX
     exit(0);
+#endif
 }
 
 int
@@ -90,7 +102,7 @@ main(void)
     sodium_mprotect_readwrite(buf);
 #endif
 
-#if defined(HAVE_CATCHABLE_SEGV) && !defined(__EMSCRIPTEN__) && !defined(__SANITIZE_ADDRESS__)
+#if defined(HAVE_CATCHABLE_SEGV) && !defined(__EMSCRIPTEN__) && !defined(SGX) && !defined(__SANITIZE_ADDRESS__)
     sodium_memzero(((unsigned char *) buf) + size, 1U);
     sodium_mprotect_noaccess(buf);
     sodium_free(buf);
