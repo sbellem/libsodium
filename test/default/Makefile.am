@@ -243,9 +243,14 @@ TESTS_TARGETS = \
 	verify1
 
 if !EMSCRIPTEN
-TESTS_TARGETS += \
-	sodium_utils2 \
-	sodium_utils3
+if !NATIVECLIENT
+TESTS_TARGETS += sodium_utils2
+
+if !SGX
+	TESTS_TARGETS += sodium_utils3
+endif
+
+endif
 endif
 
 check_PROGRAMS = $(TESTS_TARGETS)
