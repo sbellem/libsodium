@@ -8,7 +8,7 @@
 # include <pwd.h>
 # define MAX_PATH FILENAME_MAX
 
-#include <sodium.h>
+#include "../../src/libsodium/include/sodium.h"
 
 #include "sgx_urts.h"
 #include "sgx_error.h"       /* sgx_status_t */
