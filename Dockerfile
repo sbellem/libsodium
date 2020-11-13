@@ -1,4 +1,4 @@
-FROM initc3/linux-sgx:2.2
+FROM initc3/linux-sgx:2.4-ubuntu16.04
 
 RUN apt-get update && apt-get install -y \
                 gcc \
