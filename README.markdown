@@ -1,10 +1,15 @@
-[![Build Status](https://travis-ci.com/jedisct1/libsodium.svg?branch=master)](https://travis-ci.com/jedisct1/libsodium?branch=master)
-[![Windows build status](https://ci.appveyor.com/api/projects/status/fu8s2elx25il98hj?svg=true)](https://ci.appveyor.com/project/jedisct1/libsodium)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/2397/badge.svg)](https://scan.coverity.com/projects/2397)
-[![Azure build status](https://jedisct1.visualstudio.com/Libsodium/_apis/build/status/jedisct1.libsodium?branchName=stable)](https://jedisct1.visualstudio.com/Libsodium/_build/latest?definitionId=3&branchName=stable)
-![CodeQL scan](https://github.com/jedisct1/libsodium/workflows/CodeQL%20scan/badge.svg)
+[![Build Status](https://travis-ci.com/initc3/libsodium.svg?branch=libsodium-sgx)](https://travis-ci.com/initc3/libsodium?branch=libsodium-sgx)
 
-![libsodium](https://raw.github.com/jedisct1/libsodium/master/logo.png)
+============
+
+**DO NOT USE - IT DOES NOT WORK!**
+
+**WORK in PROGRESS** This is a fork of [libsodium](https://github.com/jedisct1/libsodium)
+that aims to add support for Intel SGX, using
+[Intel SGX for Linux](https://github.com/intel/linux-sgx).
+
+Progress is tracked at https://github.com/initc3/libsodium/issues/1.
+
 ============
 
 Sodium is a new, easy-to-use software library for encryption,
